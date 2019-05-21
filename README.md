@@ -17,11 +17,13 @@ Original settings by *Cassie* made html files to also display JavaScript higligh
 ### i18n-data html attribute highlight
 
 The `i18n-data` html attribute is changed to be highlighed in orange instead of the default green for attributes. The attributes value is highlighed in blue. Handy if you're in progress of creating/editing language tags for sheets
+![data-i18n attribute](/images/data-i18n.png)
 
 ### custom html tag highights
 
 The HTML tags `button`,`rolltemplate` and `charactermancer` are changed to show up in orange instead of the default red for html tags
 
+![button](/images/button.png)
 
 ## Making changes
 
