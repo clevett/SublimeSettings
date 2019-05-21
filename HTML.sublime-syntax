@@ -38,7 +38,7 @@ variables:
 
   form_tag_name: |-
     (?ix:
-      button|datalist|input|label|legend|meter|optgroup|option|output|progress|select|template|textarea
+      datalist|input|label|legend|meter|optgroup|option|output|progress|select|template|textarea
     ){{tag_name_break}}
 
   javascript_mime_type: |-
@@ -139,6 +139,14 @@ contexts:
         2: entity.name.tag.block.form.html
       push:
         - meta_scope: meta.tag.block.form.html
+        - include: tag-end
+        - include: tag-attributes
+    - match: (</?)((?i:button|rolltemplate|charmancer){{tag_name_break}})
+      captures:
+        1: punctuation.definition.tag.begin.html
+        2: variable.language.block.form.html
+      push:
+        - meta_scope: meta.variable.language.tag.block.form.html
         - include: tag-end
         - include: tag-attributes
     - match: (</?)({{inline_tag_name}})
@@ -567,6 +575,106 @@ contexts:
         - match: '["''`<]'
           scope: invalid.illegal.attribute-value.html
     - include: else-pop
+# custom syntax to catch 'data-i18n' html attribute, based on the 'class' attribute section's code 
+  tag-data-attribute:
+    - match: '\bdata-i18n\b'
+      scope: variable.language.data.html # tells Sublime to treat 'data-i18n' as a 'variable.language', all which colorscheme is defined in Monokai colorfile. In the color file added 'variable.language' as a scope for something that gave different color than default html attribute color
+      push:
+        - tag-data-attribute-meta
+        - tag-data-attribute-equals
+
+  tag-data-attribute-meta:
+    - meta_scope: meta.attribute-with-value.data.html
+    - include: immediately-pop
+
+  tag-data-attribute-equals:
+    - match: '='
+      scope: punctuation.separator.key-value.html
+      set: tag-data-attribute-value
+    - include: else-pop
+
+  tag-data-attribute-value:
+    - match: '"'
+      scope: punctuation.definition.string.begin.html
+      set:
+        - meta_scope: variable.other.html  # tells Sublime to treat 'data-i18n''s value as a 'variable.other', which colorscheme is defined in Monokai colorfile. In the color file added 'variable.other' as a scope for something that gave different color than default html attribute color
+        - meta_content_scope: meta.data-name.html
+        - match: '"'
+          scope: punctuation.definition.string.end.html
+          pop: true
+        - include: entities
+    - match: "'"
+      scope: punctuation.definition.string.begin.html
+      set:
+        - meta_scope: string.quoted.single.html
+        - meta_content_scope: meta.data-name.html
+        - match: "'"
+          scope: punctuation.definition.string.end.html
+          pop: true
+        - include: entities
+    - match: '{{unquoted_attribute_start}}'
+      set:
+        - meta_scope: string.unquoted.html meta.data-name.html
+        - match: '{{unquoted_attribute_break}}'
+          pop: true
+        - match: '["''`<]'
+          scope: invalid.illegal.attribute-value.html
+    - include: else-pop
+
+  tag-button-attribute:
+    - match: '\bbutton\b'
+      scope: variable.language.html
+      push:
+        - tag-button-attribute-meta
+
+  tag-button-attribute-meta:
+    - meta_scope: meta.variable.language.html
+    - include: immediately-pop
+
+  tag-value-attribute:
+    - match: '\bvalue\b'
+      scope: entity.other.attribute-name.value.html # tells Sublime to treat 'value-i18n' as a 'variable.language', all which colorscheme is defined in Monokai colorfile. In the color file added 'variable.language' as a scope for something that gave different color than default html attribute color
+      push:
+        - tag-value-attribute-meta
+        - tag-value-attribute-equals
+
+  tag-value-attribute-meta:
+    - meta_scope: meta.attribute-with-value.value.html
+    - include: immediately-pop
+
+  tag-value-attribute-equals:
+    - match: '='
+      scope: punctuation.separator.key-value.html
+      set: tag-value-attribute-value
+    - include: else-pop
+
+  tag-value-attribute-value:
+    - match: '"'
+      scope: punctuation.definition.string.begin.html
+      set:
+        - meta_scope: variable.other.html  # tells Sublime to treat 'value-i18n''s value as a 'variable.other', which colorscheme is defined in Monokai colorfile. In the color file added 'variable.other' as a scope for something that gave different color than default html attribute color
+        - meta_content_scope: meta.value-name.html
+        - match: '"'
+          scope: punctuation.definition.string.end.html
+          pop: true
+        - include: entities
+    - match: "'"
+      scope: punctuation.definition.string.begin.html
+      set:
+        - meta_scope: string.quoted.single.html
+        - meta_content_scope: meta.value-name.html
+        - match: "'"
+          scope: punctuation.definition.string.end.html
+          pop: true
+        - include: entities
+    - match: '{{unquoted_attribute_start}}'
+      set:
+        - meta_scope: string.unquoted.html meta.value-name.html
+        - match: '{{unquoted_attribute_break}}'
+          pop: true
+        - match: '["''`<]'
+          scope: invalid.illegal.attribute-value.html
+    - include: else-pop
 
   tag-id-attribute:
     - match: '\bid\b'
@@ -699,6 +807,8 @@ contexts:
   tag-attributes:
     - include: tag-id-attribute
     - include: tag-class-attribute
+    - include: tag-data-attribute
+    - include: tag-button-attribute
     - include: tag-style-attribute
     - include: tag-event-attribute
     - include: tag-generic-attribute
@@ -717,3 +827,4 @@ contexts:
     - match: '/?>'
       scope: punctuation.definition.tag.end.html
       pop: true
+
